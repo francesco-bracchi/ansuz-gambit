@@ -13,7 +13,7 @@
        (kl (gensym 'kl))
        (e (gensym 'e))
        (es (gensym 'es)))
-    `(reify (,mm ,m)
+    `(reify (,mm (parser-eval ,m))
             (parser-eval
              (letrec(
                      (,kl (parser (,es)
