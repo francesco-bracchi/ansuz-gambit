@@ -6,21 +6,18 @@
             replace))
 
 (define-macro (regexp e)
-  (include "~~futhark/ansuz/sources/string#.scm")
-  (include "~~futhark/ansuz/char-stream-parser#.scm")
-  (include "~~futhark/ansuz/re/parser#.scm")
-  (include "~~futhark/ansuz/re/fgen#.scm")
-  (load "~~futhark/ansuz/re/sets")
-  (load "~~futhark/ansuz/re/fsm")
-  (load "~~futhark/ansuz/re/parser")
-  (load "~~futhark/ansuz/re/fgen")
+  (include "~~ansuz/sources/string#.scm")
+  (include "~~ansuz/char-stream-parser#.scm")
+  (include "~~ansuz/re/parser#.scm")
+  (include "~~ansuz/re/fgen#.scm")
+  (load "~~ansuz/re/sets")
+  (load "~~ansuz/re/fsm")
+  (load "~~ansuz/re/parser")
+  (load "~~ansuz/re/fgen")
   (fsm->code (run-monad (re)
                         (stream e)
                         (lambda v (car v))
                         (lambda r (error (car r))))))
-
-
-
 
 (define-macro (init-regexp)
 
