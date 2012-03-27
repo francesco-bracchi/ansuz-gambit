@@ -91,6 +91,8 @@
      
      ((and (pair? e) (eq? (car e) 'letrec))
       `(letrec+ ,(cadr e) (parser-eval (>> ,@(cddr e)))))
+
+     ((not (pair? e)) `(get ,e))
      (else e)))
 
 ;; (define-macro (run p s #!optional (fail 'raise))
