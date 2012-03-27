@@ -3,14 +3,12 @@
          (not safe)
          (block))
 
-(load "../src/expressions")
 
 (##namespace ("calc#"))
-
 (##include "~~/lib/gambit#.scm")
 
-(include "../src/on-strings#.scm")
-(include "../src/expressions#.scm")
+(include "~~ansuz/on-strings#.scm")
+(include "~~ansuz/expressions#.scm")
 
 (define-parser (spc)
   ;; (many #\space)
@@ -143,11 +141,9 @@
   (display "postfix operators ! ^\n")
   (let forever ()
     (display "?")
-    (let (
-          (c (read-line)))
+    (let ((c (read-line)))
       (if (eof-object? c) (newline)
-          (let(
-               (val (calc c)))
+          (let((val (calc c)))
             (if (eq? val 'fail)
                 (display "not well formed expression\n")
                 (begin
