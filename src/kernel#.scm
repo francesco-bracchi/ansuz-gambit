@@ -21,10 +21,25 @@
                     (,sc ,ch (stream-cdr ,st) ,fl)
                     (,fl (list 'test-failed ,t? ,ch) ,st ,sc))))))
 
+;; (define-macro+ (get c0)
+;;   (let(
+;;        (ch (gensym 'ch)))
+;;     `(get-if (lambda (,ch) (eq? ,c0 ,ch)))))
+
 (define-macro+ (get c0)
   (let(
+       (st (gensym 'st))
+       (sc (gensym 'sc))
+       (fl (gensym 'fl))
        (ch (gensym 'ch)))
-    `(get-if (lambda (,ch) (eq? ,c0 ,ch)))))
+    (if (not (char? c0)) (error "get wants a character as argument"))
+    `(reflect (,st ,sc ,fl)
+              (let(
+                   (,ch (stream-car ,st)))
+                (if (and (char? ,ch) (char=? ,ch ,c0))
+                    (,sc ,ch (stream-cdr ,st) ,fl)
+                    (,fl (list 'test-failed ,t? ,ch) ,st ,sc))))))
+
 
 (define-macro+ (get c0)
   (let((ch (gensym 'ch))
@@ -34,7 +49,7 @@
     `(reflect (,st ,sc ,fl)
 	      (if (eq? (stream-car ,st) ,c0)
 		  (,sc ,c0 (stream-cdr ,st) ,fl)
-		  (,fl (list 'not ,c0) ,st ,sc)))))
+		  (,fl (quote (not ,c0)) ,st ,sc)))))
     
 
 (define-macro+ (fail r)
