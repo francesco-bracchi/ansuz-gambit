@@ -97,6 +97,13 @@
   (spc)
   #\! (return factorial))
 
+(define (imaginary n)
+(* +i n))
+  
+(define-parser (imag)
+  (spc)
+  #\i (return imaginary))
+
 (define table
   (let((prefix `((,dif 1)))
        (infix  `((,sum 1 left)
@@ -104,7 +111,8 @@
 		 (,mul 2 left)
 		 (,div 2 left)))
        (postfix`((,sqr 3)
-		 (,fac 4))))
+		 (,fac 4)
+		 (,imag 5))))
   (make-operator-table
    prefix
    infix
@@ -134,11 +142,13 @@
      (run (math-exp) s))))
 
 (define (calc-repl)
-  (display "press ctrl-D to exit\n")
-  (display "available commands:\n")
-  (display "prefix operators -\n")
-  (display "infix operators + - * / \n")
-  (display "postfix operators ! ^\n")
+  (for-each (lambda (s) (display s) (newline))
+	    '("this is a simple example for expressions in ansuz"
+	      "press ctrl-D to exit"
+	      "available commands:"
+	      "prefix operators -"
+	      "infix operators + - * /"
+	      "postfix operators ! ^ i"))
   (let forever ()
     (display "?")
     (let ((c (read-line)))
