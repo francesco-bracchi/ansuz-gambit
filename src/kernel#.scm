@@ -32,7 +32,6 @@
        (sc (gensym 'sc))
        (fl (gensym 'fl))
        (ch (gensym 'ch)))
-    (if (not (char? c0)) (error "get wants a character as argument"))
     `(reflect (,st ,sc ,fl)
               (let(
                    (,ch (stream-car ,st)))
