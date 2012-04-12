@@ -1,7 +1,7 @@
 (##namespace ("ansuz-monad#"
               lambda+
               define-macro+
-              return
+              ret
               bind
               sequence))
 
@@ -25,7 +25,7 @@
     `(define-macro ,(append h (list st sc fl))
        (list 'with-state (list ,st ,sc ,fl) ,b))))
 
-(define-macro+ (return v)
+(define-macro+ (ret v)
   (let(
        (st (gensym 'st))
        (sc (gensym 'sc))

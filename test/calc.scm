@@ -15,16 +15,15 @@
   (kleene #\space))
 
 (define idigit
-  (let(
-       (i0 (char->integer #\0)))
+  (let((i0 (char->integer #\0)))
     (parser ()
-            (>> (<- c (digit))
-                (return (- (char->integer c) i0))))))
+	    (<- c (digit))
+	    (ret (- (char->integer c) i0)))))
 
 (define-parser (int+ c)
-  (<> (>> (<- c1 (idigit))
-          (int+ (+ c1 (* 10 c))))
-      (return c)))
+  (alt (con (<- c1 (idigit))
+	    (int+ (+ c1 (* 10 c))))
+       (ret c)))
 
 (define-parser (int) 
   (<- d (idigit))
@@ -36,58 +35,58 @@
   (frac+ (/ 1 100) (/ d 10)))
 
 (define-parser (frac+ m c0)
-  (<> (>> (<- c (idigit))
-          (frac+ (/ m 10) (+ (* m c) c0)))
-      (return c0)))
+  (alt (con (<- c (idigit))
+	    (frac+ (/ m 10) (+ (* m c) c0)))
+       (ret c0)))
 
 (define-parser (sign)
-  (<> (>> #\+ (return (lambda (n) n)))
-      (>> #\- (return (lambda (n) (- n))))
-      (return (lambda (n) n))))
-                      
+  (alt (con #\+ (ret (lambda (n) n)))
+       (con #\- (ret (lambda (n) (- n))))
+       (ret (lambda (n) n))))
+
 (define-parser (pow10)
-  (<> #\e #\E)
+  (alt #\e #\E)
   (<- s (sign))
   (<- i (int))
-  (return (s i)))
+  (ret (s i)))
 
 ;; NUMBER : 1 1.1 1.1e-10 1.1e+10 +1 -1 1.1e10 ...
 (define-parser (num)
   (<- s (sign))
   (<- ip (int))
-  (<- fp (<> (frac) (return 0)))
-  (<- ex (<> (pow10) (return 0)))
-  (return (s (* (+ ip fp) (expt 10 ex)))))
+  (<- fp (alt (frac) (ret 0)))
+  (<- ex (alt (pow10) (ret 0)))
+  (ret (s (* (+ ip fp) (expt 10 ex)))))
 
 (define-parser (number)
   (<- n (num))
   (eos)
-  (return n))
+  (ret n))
 
 
 (define-parser (sum)
   (spc)
   #\+ 
-  (return +))
+  (ret +))
 
 (define-parser (dif)
   (spc)
   #\- 
-  (return -))
+  (ret -))
 
 (define-parser (mul)
   (spc)
   #\* 
-  (return *))
+  (ret *))
 
 (define-parser (div)
   (spc)
   #\/ 
-  (return /))
+  (ret /))
 
 (define-parser (sqr)
   (spc)
-  #\^ (return (lambda (c) (* c c))))
+  #\^ (ret (lambda (c) (* c c))))
 
 (define (factorial n)
   (if (< n 1) 1
@@ -95,14 +94,14 @@
 
 (define-parser (fac)
   (spc)
-  #\! (return factorial))
+  #\! (ret factorial))
 
 (define (imaginary n)
-(* +i n))
-  
+  (* +i n))
+
 (define-parser (imag)
   (spc)
-  #\i (return imaginary))
+  #\i (ret imaginary))
 
 (define table
   (let((prefix `((,dif 1)))
@@ -113,27 +112,27 @@
        (postfix`((,sqr 3)
 		 (,fac 4)
 		 (,imag 5))))
-  (make-operator-table
-   prefix
-   infix
-   postfix)))
+    (make-operator-table
+     prefix
+     infix
+     postfix)))
 
 (define-parser (par)
   #\(
   (<- e (expr table _term))
   (spc)
   #\)
-  (return e))
+  (ret e))
 
 (define-parser (_term)
   (spc)
-  (<> (num) (par)))
+  (alt (num) (par)))
 
 (define-parser (math-exp)
   (<- r (expr table _term))
   (spc)
-  (<> (eos) (fail "end expected"))
-  (return r))
+  (alt (eos) (fail "end expected"))
+  (ret r))
 
 (define (calc s)
   (with-exception-catcher

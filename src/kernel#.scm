@@ -9,36 +9,15 @@
   ))
 
 (define-macro+ (get-if t?)
-  (let(
-       (st (gensym 'st))
+  (let((st (gensym 'st))
        (sc (gensym 'sc))
        (fl (gensym 'fl))
        (ch (gensym 'ch)))
     `(reflect (,st ,sc ,fl)
-              (let(
-                   (,ch (stream-car ,st)))
+              (let((,ch (stream-car ,st)))
                 (if (,t? ,ch)
                     (,sc ,ch (stream-cdr ,st) ,fl)
                     (,fl (list 'test-failed ,t? ,ch) ,st ,sc))))))
-
-;; (define-macro+ (get c0)
-;;   (let(
-;;        (ch (gensym 'ch)))
-;;     `(get-if (lambda (,ch) (eq? ,c0 ,ch)))))
-
-(define-macro+ (get c0)
-  (let(
-       (st (gensym 'st))
-       (sc (gensym 'sc))
-       (fl (gensym 'fl))
-       (ch (gensym 'ch)))
-    `(reflect (,st ,sc ,fl)
-              (let(
-                   (,ch (stream-car ,st)))
-                (if (and (char? ,ch) (char=? ,ch ,c0))
-                    (,sc ,ch (stream-cdr ,st) ,fl)
-                    (,fl (list 'test-failed ,t? ,ch) ,st ,sc))))))
-
 
 (define-macro+ (get c0)
   (let((ch (gensym 'ch))
@@ -49,35 +28,30 @@
 	      (if (eq? (stream-car ,st) ,c0)
 		  (,sc ,c0 (stream-cdr ,st) ,fl)
 		  (,fl (quote (not ,c0)) ,st ,sc)))))
-    
 
 (define-macro+ (fail r)
-  (let(
-       (st (gensym 'st))
+  (let((st (gensym 'st))
        (sc (gensym 'sc))
        (fl (gensym 'fl)))
     `(reflect (,st ,sc ,fl)
               (,fl ,r ,st ,sc))))
 
 (define-macro+ (get-stream)
-  (let(
-       (st (gensym 'st))
+  (let((st (gensym 'st))
        (sc (gensym 'sc))
        (fl (gensym 'fl)))
     `(reflect (,st ,sc ,fl)
               (,sc ,st ,st ,fl))))
 
 (define-macro+ (get-continuation)
-  (let(
-       (st (gensym 'st))
+  (let((st (gensym 'st))
        (sc (gensym 'sc))
        (fl (gensym 'fl)))
     `(reflect (,st ,sc ,fl)
               (,sc ,sc ,st ,fl))))
 
 (define-macro+ (get-backtrack)
-  (let(
-       (st (gensym 'st))
+  (let((st (gensym 'st))
        (sc (gensym 'sc))
        (fl (gensym 'fl)))
     `(reflect (,st ,sc ,fl)

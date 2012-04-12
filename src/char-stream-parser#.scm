@@ -23,18 +23,15 @@
 
 (define-macro+ (get-if-char t?)
   ;; todo inline get-if-char
-  (let(
-       (ch (gensym 'ch)))
+  (let((ch (gensym 'ch)))
     `(get-if (lambda (,ch) (and (char? ,ch) (,t? ,ch))))))
 
 (define-macro+ (char c0)
-  (let(
-       (ch (gensym 'ch)))
+  (let((ch (gensym 'ch)))
     `(get-if-char (lambda (,ch) (char=? ,ch ,c0)))))
 
 (define-macro+ (interval lo up)
-  (let(
-       (ch (gensym 'ch)))
+  (let((ch (gensym 'ch)))
     `(get-if (lambda (,ch) (and (char? ,ch) (char>=? ,ch ,lo) (char<=? ,ch ,up))))))
 
 (define-macro+ (upcase)
@@ -56,14 +53,12 @@
   '(get-if eof-object?))
 
 (define-macro+ (any)
-  (let(
-       (e (gensym 'e)))
+  (let((e (gensym 'e)))
     `(get-if (lambda (,e) (not (eof-object? ,e))))))
 
 
 (define-macro+ (word w)
-  (let(
-       (l (gensym 'l))
+  (let((l (gensym 'l))
        (wd (gensym 'wd))
        (j (gensym 'j)))
     `(parser-eval
@@ -71,22 +66,20 @@
            (,l (string-length ,w)))
         (letrec(
                 (,wd (parser (,j)
-                             (if (>= ,j ,l) (return ,w)
-                                 (>> (char (string-ref ,w ,j))
-                                     (,wd (+ ,j 1)))))))
+                             (if (>= ,j ,l) (ret ,w)
+                                 (con (char (string-ref ,w ,j))
+				      (,wd (+ ,j 1)))))))
           (,wd 0))))))
 
 (define-macro+ (separated-values sep val)
-  (let(
-       (sp (gensym 'sp))
+  (let((sp (gensym 'sp))
        (vl (gensym 'vl))
        (v (gensym 'v))
-       (vs (gensym 'vs))
-       )
+       (vs (gensym 'vs)))
     `(reify (,sp ,sep)
             (reify (,vl ,val)
                    (parser-eval
-                    (<> (>> (<- ,v (,vl))
-                            (<- ,vs (kleene (>> (,sp) (,vl))))
-                            (return (cons ,v ,vs)))
-                        (return '())))))))
+                    (alt (con (<- ,v (,vl))
+			      (<- ,vs (kleene (con (,sp) (,vl))))
+			      (ret (cons ,v ,vs)))
+                        (ret '())))))))

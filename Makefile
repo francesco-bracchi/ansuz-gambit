@@ -46,6 +46,3 @@ $(TESTDIR)/calc.o1:
 
 calc: libdir $(TESTDIR)/calc.o1
 	$(GSI) -:~~$(LIBNAME)=$(LIBDIR) -e "(load \"~~${LIBNAME}/expressions\")" $(TESTDIR)/calc
-
-xxx:
-	@echo $(SOURCES)

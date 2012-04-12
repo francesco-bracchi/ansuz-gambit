@@ -17,9 +17,9 @@
             (parser-eval
              (letrec(
                      (,kl (parser (,es)
-                                  (<> (>> (<- ,e (,mm))
-                                          (,kl (cons ,e ,es)))
-                                      (return (reverse ,es))))))
+                                  (alt (con (<- ,e (,mm))
+					    (,kl (cons ,e ,es)))
+				       (ret (reverse ,es))))))
                (,kl '()))))))
   
 (define-macro+ (upto n m)
@@ -33,10 +33,10 @@
             (parser-eval
              (letrec(
                      (,ut (parser (,j ,es)
-                                  (if (= ,j 0) (return (reverse ,es))
-                                      (<> (>> (<- ,e (,mm))
+                                  (if (= ,j 0) (ret (reverse ,es))
+                                      (alt (con (<- ,e (,mm))
                                               (,ut (- ,j 1)  (cons ,e ,es)))
-                                          (return (reverse ,es)))))))
+                                          (ret (reverse ,es)))))))
                (,ut ,n '()))))))
 
 (define-macro+ (times n m)
@@ -50,10 +50,10 @@
             (parser-eval
              (letrec(
                      (,tm (parser (,x)
-                                  (if (= ,x 0) (return '())
-                                      (>> (<- ,e (,mm))
+                                  (if (= ,x 0) (ret '())
+                                      (con (<- ,e (,mm))
                                           (<- ,es (,tm (- ,x 1)))
-                                          (return (cons ,e ,es)))))))
+                                          (ret (cons ,e ,es)))))))
                (,tm ,n))))))
   
 
@@ -67,9 +67,9 @@
     `(parser-eval
       (let(
            (,mm (parser () (parser-eval ,m))))
-        (>> (<- ,h (times ,n (,mm)))
+        (con (<- ,h (times ,n (,mm)))
             (<- ,t (kleene (,mm)))
-            (return (append ,h ,t)))))))
+            (ret (append ,h ,t)))))))
 
 
 (define-macro+ (repeat-max n m p)
@@ -80,15 +80,15 @@
     `(parser-eval
       (let(
            (,mm (parser () (parser-eval ,p))))
-        (>> (<- ,h (times ,n (,mm)))
-            (<- ,t (upto (- ,m ,n) (,mm)))
-            (return (append ,h ,t)))))))
+        (con (<- ,h (times ,n (,mm)))
+	     (<- ,t (upto (- ,m ,n) (,mm)))
+	     (ret (append ,h ,t)))))))
 
 (define-macro+ (maybe m)
   (let(
        (mm (gensym 'm)))
     `(reify (,mm (parser-eval ,m))
-            (orelse (parser-eval ,m) (return '())))))
+            (orelse (parser-eval ,m) (ret '())))))
     
 
        

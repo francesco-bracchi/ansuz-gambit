@@ -4,11 +4,11 @@
 ;; that if the orelse left branch matches the whole parser returns that.
 ;; it's clearer by an example.
 ;; suppose
-;; (>> (<> ab a) b)
+;; (seq (alt ab a) b)
 ;; where ab matches string 'ab' , a the string 'a' and b string 'b'
 ;; the above expression can match
 ;; 'abb' and 'ab' strings.
-;; but if the <> operator is the one that do not mantain the backtrace reference
+;; but if the alt operator is the one that do not mantain the backtrace reference
 ;; happens that it fails when input is 'ab':
 ;; the parser first recognize ab, then it expects another b so if simply fails.
 ;; in the case of orelse* when fail looking for b call backtracking and finds
@@ -18,7 +18,7 @@
 ;; when left branch succeed.
 ;; In any case incorrect orelse works fine for many cases, and many times when
 ;; do not work fine we can simply transform it. We can rewrite our example as
-;; (<> (>> ab b) (>> a b))
+;; (alt (con ab b) (con a b))
 ;; that works correctly.
 ;; For deterministic parsers the incorrect orelse is sufficient to describe any
 ;; parser.
