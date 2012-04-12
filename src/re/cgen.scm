@@ -10,22 +10,19 @@
 (include "fsm#.scm")
 (include "sets#.scm")
 
-;; test every element in list l with function t?
-;; if the result is true it added to the result.
-;; example
-;; (filter odd? '(1 2 3 4 5 6 7)) -> '(1 3 5 7)
-(define (filter t? l)
-  (cond
-   ((null? l) '())
-   ((t? (car l)) (cons (car l) (filter t? (cdr l))))
-   (else (filter t? (cdr l)))))
-
-;; initial buffer size
-(define initial-size 64)
-
 ;; takes a fsm
 ;; that is supposed to be a deterministic finite automata
-(define (fsm->code fsm)
+(define (fsm->code fsm #!key (initial-size 64))
+
+  ;; test every element in list l with function t?
+  ;; if the result is true it added to the result.
+  ;; example
+  ;; (filter odd? '(1 2 3 4 5 6 7)) -> '(1 3 5 7)
+  (define (filter t? l)
+    (cond
+     ((null? l) '())
+     ((t? (car l)) (cons (car l) (filter t? (cdr l))))
+     (else (filter t? (cdr l)))))
   
   ;; transform a set in the for of list of intervals
   ;; in a predicate suitable to be part of a cond clause
@@ -89,29 +86,19 @@
       
   ;; generates a binding between the state and the function 
   (define (state->binding s)
-    `(define ,s ,(state->function s)))
+    `(,s ,(state->function s)))
 
   ;; generates code that run the fsm
   (define (fsm->function)
-    `(begin
-       ;; (declare (not safe) (not inline) (fixnum) (standard-bindings) (extended-bindings))
-       ,@(map state->binding (fsm-states fsm))
+    (declare (not safe) (not inline) (fixnum) (standard-bindings) (extended-bindings))
+    `(letrec ,(map state->binding (fsm-states fsm))
        (,(fsm-initial-state fsm)
         (make-string ,initial-size) ;; buf
         ,(- initial-size 1)         ;; lim
         st                          ;; wts
         0                           ;; wpos
         #f                          ;; fts
-        #f)))                       ;; fpos
-        
-
-  ;; MAIN
+        #f)))                       ;; MAIN
   ;; the whole wrapped in a reflect expression
   `(reflect (st sc fl)
             ,(fsm->function)))
-
-              
-                     
-      
-               
-  

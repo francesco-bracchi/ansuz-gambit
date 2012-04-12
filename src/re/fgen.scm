@@ -12,7 +12,6 @@
    ((t? (car l)) (cons (car l) (filter t? (cdr l))))
    (else (filter t? (cdr l)))))
 
-
 (define (fsm->code fsm)
   (define (set->predicate s)
     `(or ,@(map interval->predicate s)))
