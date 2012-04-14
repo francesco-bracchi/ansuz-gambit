@@ -1,44 +1,50 @@
 (##namespace
  ("ansuz-extras#"
-  kleene
+  maybe
+  many
   times
   upto
-  repeat
-  repeat-max
-  maybe))
+  at-least
+  at-least\most
+  many/separated))
 
-(define-macro+ (kleene m)
-  (let(
-       (mm (gensym 'mm))
-       (kl (gensym 'kl))
-       (e (gensym 'e))
-       (es (gensym 'es)))
+;; 0 or 1 times
+(define-macro+ (maybe m)
+  (let ((mm (gensym 'm)))
+    `(reify (,mm (parser-eval ,m))
+            (orelse (parser-eval ,m) (ret '())))))
+    
+;; 0 to n times
+(define-macro+ (many m)
+  (let ((mm (gensym 'mm))
+o	(kl (gensym 'kl))
+	(e (gensym 'e))
+	(es (gensym 'es)))
     `(reify (,mm (parser-eval ,m))
             (parser-eval
-             (letrec(
-                     (,kl (parser (,es)
-                                  (alt (con (<- ,e (,mm))
-					    (,kl (cons ,e ,es)))
-				       (ret (reverse ,es))))))
+             (letrec ((,kl (parser (,es)
+				   (alt (con (<- ,e (,mm))
+					     (,kl (cons ,e ,es)))
+					(ret (reverse ,es))))))
                (,kl '()))))))
-  
+
+;; up to n times
 (define-macro+ (upto n m)
-  (let(
-       (mm (gensym 'mm))
-       (ut (gensym 'ut))
-       (e  (gensym 'e))
-       (es (gensym 'es))
-       (j  (gensym 'j)))
+  (let ((mm (gensym 'mm))
+	(ut (gensym 'ut))
+	(e  (gensym 'e))
+	(es (gensym 'es))
+	(j  (gensym 'j)))
     `(reify (,mm (parser-eval ,m))
             (parser-eval
-             (letrec(
-                     (,ut (parser (,j ,es)
-                                  (if (= ,j 0) (ret (reverse ,es))
-                                      (alt (con (<- ,e (,mm))
-                                              (,ut (- ,j 1)  (cons ,e ,es)))
-                                          (ret (reverse ,es)))))))
+             (letrec ((,ut (parser (,j ,es)
+				   (if (= ,j 0) (ret (reverse ,es))
+				       (alt (con (<- ,e (,mm))
+						 (,ut (- ,j 1)  (cons ,e ,es)))
+					    (ret (reverse ,es)))))))
                (,ut ,n '()))))))
 
+;; exactly n times
 (define-macro+ (times n m)
   (let(
        (mm (gensym 'm))
@@ -48,47 +54,44 @@
        (es (gensym'es)))
     `(reify (,mm (parser-eval ,m))
             (parser-eval
-             (letrec(
-                     (,tm (parser (,x)
-                                  (if (= ,x 0) (ret '())
-                                      (con (<- ,e (,mm))
-                                          (<- ,es (,tm (- ,x 1)))
-                                          (ret (cons ,e ,es)))))))
+             (letrec ((,tm (parser (,x)
+				   (if (= ,x 0) (ret '())
+				       (con (<- ,e (,mm))
+					    (<- ,es (,tm (- ,x 1)))
+					    (ret (cons ,e ,es)))))))
                (,tm ,n))))))
   
-
-
-(define-macro+ (repeat n m)
-  (let(
-       (mm (gensym 'mm))
-       (h (gensym 'h))
-       (t (gensym 't)))
-    
+;; at least n times
+(define-macro+ (at-least n m)
+  (let ((mm (gensym 'mm))
+	(h (gensym 'h))
+	(t (gensym 't)))
     `(parser-eval
-      (let(
-           (,mm (parser () (parser-eval ,m))))
+      (let ((,mm (parser () (parser-eval ,m))))
         (con (<- ,h (times ,n (,mm)))
-            (<- ,t (kleene (,mm)))
-            (ret (append ,h ,t)))))))
+	     (<- ,t (many (,mm)))
+	     (ret (append ,h ,t)))))))
 
-
-(define-macro+ (repeat-max n m p)
-  (let(
-       (mm (gensym 'mm))
-       (h (gensym 'h))
-       (t (gensym 't)))
+;; between n to m times 
+(define-macro+ (at-least\most n m p)
+  (let ((mm (gensym 'mm))
+	(h (gensym 'h))
+	(t (gensym 't)))
     `(parser-eval
-      (let(
-           (,mm (parser () (parser-eval ,p))))
+      (let ((,mm (parser () (parser-eval ,p))))
         (con (<- ,h (times ,n (,mm)))
 	     (<- ,t (upto (- ,m ,n) (,mm)))
 	     (ret (append ,h ,t)))))))
 
-(define-macro+ (maybe m)
-  (let(
-       (mm (gensym 'm)))
-    `(reify (,mm (parser-eval ,m))
-            (orelse (parser-eval ,m) (ret '())))))
-    
-
-       
+(define-macro+ (many/separated val sep)
+  (let((sp (gensym 'sp))
+       (vl (gensym 'vl))
+       (v (gensym 'v))
+       (vs (gensym 'vs)))
+    `(reify (,sp ,sep)
+            (reify (,vl ,val)
+                   (parser-eval
+                    (alt (con (<- ,v (,vl))
+			      (<- ,vs (many (con (,sp) (,vl))))
+			      (ret (cons ,v ,vs)))
+                        (ret '())))))))
