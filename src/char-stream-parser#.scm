@@ -10,8 +10,6 @@
   whitespace
   eos
   any
-  word
-  separated-values
   ))
 
 (include "reflect#.scm")
@@ -55,31 +53,3 @@
 (define-macro+ (any)
   (let((e (gensym 'e)))
     `(get-if (lambda (,e) (not (eof-object? ,e))))))
-
-
-(define-macro+ (word w)
-  (let((l (gensym 'l))
-       (wd (gensym 'wd))
-       (j (gensym 'j)))
-    `(parser-eval
-      (let(
-           (,l (string-length ,w)))
-        (letrec(
-                (,wd (parser (,j)
-                             (if (>= ,j ,l) (ret ,w)
-                                 (con (char (string-ref ,w ,j))
-				      (,wd (+ ,j 1)))))))
-          (,wd 0))))))
-
-(define-macro+ (separated-values sep val)
-  (let((sp (gensym 'sp))
-       (vl (gensym 'vl))
-       (v (gensym 'v))
-       (vs (gensym 'vs)))
-    `(reify (,sp ,sep)
-            (reify (,vl ,val)
-                   (parser-eval
-                    (alt (con (<- ,v (,vl))
-			      (<- ,vs (kleene (con (,sp) (,vl))))
-			      (ret (cons ,v ,vs)))
-                        (ret '())))))))
