@@ -90,7 +90,7 @@
   #\(
   (<- s0 (re-expr))
   #\)
-  (ret s0)))
+  (ret s0))
 
 (define-parser (re-range)
   (<- s0 (valid-char))
@@ -109,7 +109,7 @@
 (define-parser (re-set)
   #\[
   (<- neg? (alt #\~ (ret #f)))
-  (<- xs (repeat 1 (seti)))
+  (<- xs (at-least 1 (seti)))
   #\]
   ;;(ret (pp (set-complement (set-union+ xs))))
   (ret (nfa:set (if neg? (set-complement (set-union+ xs))
@@ -145,12 +145,12 @@
        (cat #\+ (ret (nfa:repeat s0  1 'inf)))
        (cat #\* (ret (nfa:repeat s0 0 'inf)))
        (re-times s0)
-       (ret s0))))
+       (ret s0)))
 
 (define-parser (re-term)
   (<- s0 (re-factor))
   (alt (cat (<- s1 (re-term)) (ret (nfa:++ s0 s1)))
-       (ret s0))))
+       (ret s0)))
 
 (define-parser (re-expr)
   (<- s0 (re-term))
