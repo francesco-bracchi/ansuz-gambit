@@ -21,7 +21,7 @@
 	    (ret (- (char->integer c) i0)))))
 
 (define-parser (int+ c)
-  (alt (con (<- c1 (idigit))
+  (alt (cat (<- c1 (idigit))
 	    (int+ (+ c1 (* 10 c))))
        (ret c)))
 
@@ -35,13 +35,13 @@
   (frac+ (/ 1 100) (/ d 10)))
 
 (define-parser (frac+ m c0)
-  (alt (con (<- c (idigit))
+  (alt (cat (<- c (idigit))
 	    (frac+ (/ m 10) (+ (* m c) c0)))
        (ret c0)))
 
 (define-parser (sign)
-  (alt (con #\+ (ret (lambda (n) n)))
-       (con #\- (ret (lambda (n) (- n))))
+  (alt (cat #\+ (ret (lambda (n) n)))
+       (cat #\- (ret (lambda (n) (- n))))
        (ret (lambda (n) n))))
 
 (define-parser (pow10)
@@ -131,7 +131,8 @@
 (define-parser (math-exp)
   (<- r (expr table _term))
   (spc)
-  (alt (eos) (fail "end expected"))
+  (alt (get-if eof-object?) (fail "end expected"))
+  ;; (alt (eos) (fail "end expected"))
   (ret r))
 
 (define (calc s)

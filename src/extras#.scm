@@ -5,7 +5,7 @@
   times
   upto
   at-least
-  at-least\most
+  at-least/most
   many/separated))
 
 ;; 0 or 1 times
@@ -17,13 +17,13 @@
 ;; 0 to n times
 (define-macro+ (many m)
   (let ((mm (gensym 'mm))
-o	(kl (gensym 'kl))
+	(kl (gensym 'kl))
 	(e (gensym 'e))
 	(es (gensym 'es)))
     `(reify (,mm (parser-eval ,m))
             (parser-eval
              (letrec ((,kl (parser (,es)
-				   (alt (con (<- ,e (,mm))
+				   (alt (cat (<- ,e (,mm))
 					     (,kl (cons ,e ,es)))
 					(ret (reverse ,es))))))
                (,kl '()))))))
@@ -39,7 +39,7 @@ o	(kl (gensym 'kl))
             (parser-eval
              (letrec ((,ut (parser (,j ,es)
 				   (if (= ,j 0) (ret (reverse ,es))
-				       (alt (con (<- ,e (,mm))
+				       (alt (cat (<- ,e (,mm))
 						 (,ut (- ,j 1)  (cons ,e ,es)))
 					    (ret (reverse ,es)))))))
                (,ut ,n '()))))))
@@ -56,7 +56,7 @@ o	(kl (gensym 'kl))
             (parser-eval
              (letrec ((,tm (parser (,x)
 				   (if (= ,x 0) (ret '())
-				       (con (<- ,e (,mm))
+				       (cat (<- ,e (,mm))
 					    (<- ,es (,tm (- ,x 1)))
 					    (ret (cons ,e ,es)))))))
                (,tm ,n))))))
@@ -68,18 +68,18 @@ o	(kl (gensym 'kl))
 	(t (gensym 't)))
     `(parser-eval
       (let ((,mm (parser () (parser-eval ,m))))
-        (con (<- ,h (times ,n (,mm)))
+        (cat (<- ,h (times ,n (,mm)))
 	     (<- ,t (many (,mm)))
 	     (ret (append ,h ,t)))))))
 
 ;; between n to m times 
-(define-macro+ (at-least\most n m p)
+(define-macro+ (at-least/most n m p)
   (let ((mm (gensym 'mm))
 	(h (gensym 'h))
 	(t (gensym 't)))
     `(parser-eval
       (let ((,mm (parser () (parser-eval ,p))))
-        (con (<- ,h (times ,n (,mm)))
+        (cat (<- ,h (times ,n (,mm)))
 	     (<- ,t (upto (- ,m ,n) (,mm)))
 	     (ret (append ,h ,t)))))))
 
@@ -91,7 +91,7 @@ o	(kl (gensym 'kl))
     `(reify (,sp ,sep)
             (reify (,vl ,val)
                    (parser-eval
-                    (alt (con (<- ,v (,vl))
-			      (<- ,vs (many (con (,sp) (,vl))))
+                    (alt (cat (<- ,v (,vl))
+			      (<- ,vs (many (cat (,sp) (,vl))))
 			      (ret (cons ,v ,vs)))
                         (ret '())))))))

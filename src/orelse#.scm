@@ -18,7 +18,7 @@
 ;; when left branch succeed.
 ;; In any case incorrect orelse works fine for many cases, and many times when
 ;; do not work fine we can simply transform it. We can rewrite our example as
-;; (alt (con ab b) (con a b))
+;; (alt (cat ab b) (cat a b))
 ;; that works correctly.
 ;; For deterministic parsers the incorrect orelse is sufficient to describe any
 ;; parser.

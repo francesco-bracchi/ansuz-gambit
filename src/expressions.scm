@@ -29,7 +29,7 @@
       (fail "prefix failed")
       (let*((pars (caar ts))
             (prec (cadar ts)))
-        (alt (con (<- func (pars))
+        (alt (cat (<- func (pars))
 		  (ret (make-result prec func 'none)))
 	     (prefix* (cdr ts))))))
 
@@ -42,7 +42,7 @@
            (pars (caar ts))
            (prec (cadar ts))
            (assc (caddar ts)))
-        (alt (con (<- func (pars))
+        (alt (cat (<- func (pars))
 		  (ret (make-result prec func assc)))
 	     (infix* (cdr ts))))))
 
@@ -54,13 +54,13 @@
       (let(
            (pars (caar ts))
            (prec (cadar ts)))
-        (alt (con (<- func (pars))
+        (alt (cat (<- func (pars))
 		  (ret (make-result prec func 'none)))
 	     (postfix* (cdr ts))))))
 
 (define-parser (expr* p ot tp)
-  (con (<- t (term ot tp))
-       (expr+ p t ot tp)))
+  (<- t (term ot tp))
+  (expr+ p t ot tp))
 
 (define-parser (expr+ p t0 ot tp)
   (alt (postfix-expr+ p t0 ot tp)
@@ -70,28 +70,28 @@
 (define (left? op) (eq? (result-associativity op) 'left))
 
 (define-parser (infix-expr+ p t0 ot tp)
-  (con (<- op (infix ot))
-       (if (< (result-precedence op) p) (fail "infix-expr+")
-	   (con (<- t1 (expr* (if (left? op)
-				  (+ 1 (result-precedence op))
-				  (result-precedence op))
-			      ot tp))
-		(expr+ p ((result-function op) t0 t1) ot tp)))))
+  (<- op (infix ot))
+  (if (< (result-precedence op) p) (fail "infix-expr+")
+      (cat (<- t1 (expr* (if (left? op)
+			     (+ 1 (result-precedence op))
+			     (result-precedence op))
+			 ot tp))
+	   (expr+ p ((result-function op) t0 t1) ot tp))))
 
 (define-parser (postfix-expr+ p t0 ot tp) ;; :-)X
-  (con (<- op (postfix ot))
-       (if (< (result-precedence op) p)
-	   (fail "postfix-expr+")
-	   (expr+ p ((result-function op) t0) ot tp))))
+  (<- op (postfix ot))
+  (if (< (result-precedence op) p)
+      (fail "postfix-expr+")
+      (expr+ p ((result-function op) t0) ot tp)))
 
 (define-parser (term ot tp) 
   (alt (prefix-expr ot tp)
        (tp)))
 
 (define-parser (prefix-expr ot tp)
-  (con (<- op (prefix ot))
-       (<- e (expr* (result-precedence op) ot tp))
-       (ret ((result-function op) e))))
+  (<- op (prefix ot))
+  (<- e (expr* (result-precedence op) ot tp))
+  (ret ((result-function op) e)))
 
 (define-parser (expr ot tp) (expr* 0 ot tp))
 

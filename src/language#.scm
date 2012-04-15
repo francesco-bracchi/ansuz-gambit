@@ -55,14 +55,14 @@
 
 (define-macro+ (parser-eval e)
     (cond
-     ((and (pair? e) (eq? (car e) 'con) (null? (cddr e)))
+     ((and (pair? e) (eq? (car e) 'cat) (null? (cddr e)))
       `(parser-eval ,(cadr e)))
      
-     ((and (pair? e) (eq? (car e) 'con) (pair? (cadr e)) (eq? (car (cadr e)) '<-))
-      `(bind (,(cadr (cadr e)) (parser-eval ,(caddr (cadr e)))) (parser-eval (con ,@(cddr e)))))
+     ((and (pair? e) (eq? (car e) 'cat) (pair? (cadr e)) (eq? (car (cadr e)) '<-))
+      `(bind (,(cadr (cadr e)) (parser-eval ,(caddr (cadr e)))) (parser-eval (cat ,@(cddr e)))))
      
-     ((and (pair? e) (eq? (car e) 'con))
-      `(sequence (parser-eval ,(cadr e)) (parser-eval (con ,@(cddr e)))))
+     ((and (pair? e) (eq? (car e) 'cat))
+      `(sequence (parser-eval ,(cadr e)) (parser-eval (cat ,@(cddr e)))))
      
      ((and (pair? e) (eq? (car e) 'alt) (null? (cddr e)))
       `(parser-eval ,(cadr e)))
@@ -80,13 +80,13 @@
       `(if+ ,(cadr e) (parser-eval ,(caddr e)) (parser-eval ,(cadddr e))))
 
      ((and (pair? e) (eq? (car e) 'let))
-      `(let+ ,(cadr e) (parser-eval (con ,@(cddr e)))))
+      `(let+ ,(cadr e) (parser-eval (cat ,@(cddr e)))))
      
      ((and (pair? e) (eq? (car e) 'let*))
-      `(let*+ ,(cadr e) (parser-eval (con ,@(cddr e)))))
+      `(let*+ ,(cadr e) (parser-eval (cat ,@(cddr e)))))
      
      ((and (pair? e) (eq? (car e) 'letrec))
-      `(letrec+ ,(cadr e) (parser-eval (con ,@(cddr e)))))
+      `(letrec+ ,(cadr e) (parser-eval (cat ,@(cddr e)))))
 
      ((not (pair? e)) `(get ,e))
      (else e)))
@@ -113,10 +113,10 @@
                 (stream ,src)
                 (lambda (,v ,st ,fl) (cons ,v (delay (,fl))))
                 (lambda (,r ,st ,sc) '()))))
-  
+
 
 (define-macro (parser f . b)
-  `(lambda+ ,f (parser-eval (con ,@b))))
+  `(lambda+ ,f (parser-eval (cat ,@b))))
 
 (define-macro (define-parser s . b)
   `(define ,(car s) (parser ,(cdr s) ,@b)))

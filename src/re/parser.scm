@@ -64,53 +64,53 @@
 
 (define-parser (re-interval p)
   (alt
-   (con (<- s0 (decimal))
-	(COMMA)
+   (cat (<- s0 (decimal))
+	#\,
 	(<- s1 (decimal))
 	(ret (nfa:repeat p s0 s1)))
    
-   (con (<- s0 (decimal))
-	(COMMA)
+   (cat (<- s0 (decimal))
+	#\,
 	(ret (nfa:repeat p s0 'inf)))
    
-   (con (<- s0 (decimal))
+   (cat (<- s0 (decimal))
 	(ret (nfa:repeat p s0 s0)))
    
-   (con (COMMA)
+   (cat #\,
 	(<- s1 (decimal))
-	(ret (nfa:repeat p 0 s1)))))     
+	(ret (nfa:repeat p 0 s1)))))
 
 (define-parser (re-times p)
-  (con (CURLED_OPEN)
-       (<- s0 (re-interval p))
-       (CURLED_CLOSE)
-       (ret s0)))
+  #\{
+  (<- s0 (re-interval p))
+  #\}
+  (ret s0))
 
 (define-parser (re-parenthesis)
-  (con (ROUND_OPEN)
-       (<- s0 (re-expr))
-       (ROUND_CLOSE)
-       (ret s0)))
+  #\(
+  (<- s0 (re-expr))
+  #\)
+  (ret s0)))
 
 (define-parser (re-range)
-  (con (<- s0 (valid-char))
-       (MINUS)
-       (<- s1 (valid-char))
-       (ret (list (cons (char->integer s0) (+ 1 (char->integer s1)))))))
+  (<- s0 (valid-char))
+  #\-
+  (<- s1 (valid-char))
+  (ret (list (cons (char->integer s0) (+ 1 (char->integer s1))))))
 
 (define-parser (re-range-singleton)
-  (con (<- s0 (valid-char))
-       (ret (list (cons (char->integer s0) (+ 1 (char->integer s0)))))))
+  (<- s0 (valid-char))
+  (ret (list (cons (char->integer s0) (+ 1 (char->integer s0))))))
 
 (define-parser (seti)
   (alt (re-range)
        (re-range-singleton)))
 
 (define-parser (re-set)
-  (char #\[)
-  (<- neg? (alt (char #\~) (ret #f)))
+  #\[
+  (<- neg? (alt #\~ (ret #f)))
   (<- xs (repeat 1 (seti)))
-  (char #\])
+  #\]
   ;;(ret (pp (set-complement (set-union+ xs))))
   (ret (nfa:set (if neg? (set-complement (set-union+ xs))
 		    (set-union+ xs)))))
@@ -123,15 +123,15 @@
             (set-union+ (set-union x (car xs)) (cdr xs))))))
 
 (define-parser (re-any)
-  (con (DOT)
-       (ret (nfa:set `((0 . ,*max*))))))
+  #\.
+  (ret (nfa:set `((0 . ,*max*)))))
 
 (define-parser (re-char)
-  (con (<- s0 (valid-char))
-       (ret (nfa:set
-	     (list (cons
-		    (char->integer s0)
-		    (+ 1 (char->integer s0))))))))
+  (<- s0 (valid-char))
+  (ret (nfa:set
+	(list (cons
+	       (char->integer s0)
+	       (+ 1 (char->integer s0)))))))
 
 (define-parser (re-atom)
   (alt (re-parenthesis)
@@ -140,27 +140,26 @@
        (re-char)))
 
 (define-parser (re-factor)
-  (con (<- s0 (re-atom))
-       (alt (con (QUEST) (ret (nfa:repeat s0 0 1)))
-	    (con (PLUS) (ret (nfa:repeat s0  1 'inf)))
-	    (con (MULT) (ret (nfa:repeat s0 0 'inf)))
-	    (re-times s0)
-	    (ret s0))))
+  (<- s0 (re-atom))
+  (alt (cat #\? (ret (nfa:repeat s0 0 1)))
+       (cat #\+ (ret (nfa:repeat s0  1 'inf)))
+       (cat #\* (ret (nfa:repeat s0 0 'inf)))
+       (re-times s0)
+       (ret s0))))
 
 (define-parser (re-term)
-  (con (<- s0 (re-factor))
-       (alt (con (<- s1 (re-term))
-		 (ret (nfa:++ s0 s1)))
-	    (ret s0))))
+  (<- s0 (re-factor))
+  (alt (cat (<- s1 (re-term)) (ret (nfa:++ s0 s1)))
+       (ret s0))))
 
 (define-parser (re-expr)
-  (con (<- s0 (re-term))
-       (alt (con (VBAR)
-		 (<- s1 (re-expr))
-		 (ret (nfa:// s0 s1)))
-	    (ret s0))))
+  (<- s0 (re-term))
+  (alt (cat #\| 
+	    (<- s1 (re-expr))
+	    (ret (nfa:// s0 s1)))
+       (ret s0)))
 
 (define-parser (re)
-  (con (<- s0 (re-expr))
-       (eos)
-       (ret (nfa->dfa s0))))
+  (<- s0 (re-expr))
+  (eos)
+  (ret (nfa->dfa s0)))
