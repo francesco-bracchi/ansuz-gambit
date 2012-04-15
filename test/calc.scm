@@ -161,4 +161,6 @@
                   (newline)))
             (forever))))))
 
+(run (math-exp) "10+2")
+
 (calc-repl)

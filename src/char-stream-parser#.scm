@@ -19,37 +19,37 @@
 (include "kernel#.scm")
 (include "extras#.scm")
 
-(define-macro+ (get-if-char t?)
+(define-macrop (get-if-char t?)
   ;; todo inline get-if-char
   (let((ch (gensym 'ch)))
     `(get-if (lambda (,ch) (and (char? ,ch) (,t? ,ch))))))
 
-(define-macro+ (char c0)
+(define-macrop (char c0)
   (let((ch (gensym 'ch)))
     `(get-if-char (lambda (,ch) (char=? ,ch ,c0)))))
 
-(define-macro+ (interval lo up)
+(define-macrop (interval lo up)
   (let((ch (gensym 'ch)))
     `(get-if (lambda (,ch) (and (char? ,ch) (char>=? ,ch ,lo) (char<=? ,ch ,up))))))
 
-(define-macro+ (upcase)
+(define-macrop (upcase)
   `(interval #\A #\Z))
 
-(define-macro+ (locase)
+(define-macrop (locase)
   `(interval #\a #\z))
 
-(define-macro+ (digit)
+(define-macrop (digit)
   `(get-if-char char-numeric?))
 
-(define-macro+ (alpha)
+(define-macrop (alpha)
   `(get-if-char char-alphabetic?))
 
-(define-macro+ (whitespace)
+(define-macrop (whitespace)
   `(get-if-char char-whitespace?))
 
-(define-macro+ (eos)
+(define-macrop (eos)
   '(get-if eof-object?))
 
-(define-macro+ (any)
+(define-macrop (any)
   (let((e (gensym 'e)))
     `(get-if (lambda (,e) (not (eof-object? ,e))))))

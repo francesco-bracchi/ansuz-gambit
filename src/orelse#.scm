@@ -27,9 +27,8 @@
 
 (##namespace ("ansuz-orelse#" orelse orelse*))
 
-(define-macro+ (orelse m n)
-  (let(
-       (mm (gensym 'm))
+(define-macrop (orelse m n)
+  (let((mm (gensym 'm))
        (nn (gensym 'n))
        (st (gensym 'st))
        (sc (gensym 'sc))
@@ -39,7 +38,6 @@
        (st1 (gensym 'st))
        (sc1 (gensym 'sc))
        (fl1 (gensym 'fl)))
-
     `(reify (,mm ,m)
             (reify (,nn ,n)
                    (reflect (,st ,sc ,fl)
@@ -50,9 +48,8 @@
                                    (,nn ,st ,sc ,fl))))))))
 
 ;; nondeterministic variation
-(define-macro+ (orelse* m n)
-  (let(
-       (mm (gensym 'm))
+(define-macrop (orelse* m n)
+  (let((mm (gensym 'm))
        (nn (gensym 'n))
        (st (gensym 'st))
        (sc (gensym 'sc))
@@ -62,7 +59,6 @@
        (st1 (gensym 'st))
        (sc1 (gensym 'sc))
        (fl1 (gensym 'fl)))
-
     `(reify (,mm ,m)
             (reify (,nn ,n)
                    (reflect (,st ,sc ,fl)

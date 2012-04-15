@@ -1,17 +1,17 @@
 (##namespace
  ("ansuz-language#"
-  let+
-  let*+
-  letrec+
-  if+
-  parser-eval
+  letp
+  letp*
+  letrecp
+  ifp
+  evalp
   
   run
   run-ndet
   parser
   define-parser))
 
-(define-macro+ (if+ t? l r)
+(define-macrop (ifp t? l r)
   (let((ll (gensym 'll))
        (rr (gensym 'rr))
        (st (gensym 'st))
@@ -24,7 +24,7 @@
                                 (,ll ,st ,sc ,fl)
                                 (,rr ,st ,sc ,fl)))))))
 
-(define-macro+ (let+ v b)
+(define-macrop (letp v b)
   (let((bb (gensym 'bb))
        (st (gensym 'st))
        (sc (gensym 'sc))
@@ -33,7 +33,7 @@
             (reflect (,st ,sc ,fl)
                      (let ,v (,bb ,st ,sc ,fl))))))
 
-(define-macro+ (let*+ hs b)
+(define-macrop (letp* hs b)
   (let((bb (gensym 'll))
        (rr (gensym 'rr))
        (st (gensym 'st))
@@ -43,7 +43,7 @@
             (reflect (,st ,sc ,fl)
                      (let* ,hs (,bb ,st ,sc ,fl))))))
 
-(define-macro+ (letrec+ hs b)
+(define-macrop (letrecp hs b)
   (let((bb (gensym 'll))
        (rr (gensym 'rr))
        (st (gensym 'st))
@@ -53,40 +53,40 @@
             (reflect (,st ,sc ,fl)
                      (letrec ,hs (,bb ,st ,sc ,fl))))))
 
-(define-macro+ (parser-eval e)
+(define-macrop (evalp e)
     (cond
      ((and (pair? e) (eq? (car e) 'cat) (null? (cddr e)))
-      `(parser-eval ,(cadr e)))
+      `(evalp ,(cadr e)))
      
      ((and (pair? e) (eq? (car e) 'cat) (pair? (cadr e)) (eq? (car (cadr e)) '<-))
-      `(bind (,(cadr (cadr e)) (parser-eval ,(caddr (cadr e)))) (parser-eval (cat ,@(cddr e)))))
+      `(bind (,(cadr (cadr e)) (evalp ,(caddr (cadr e)))) (evalp (cat ,@(cddr e)))))
      
      ((and (pair? e) (eq? (car e) 'cat))
-      `(sequence (parser-eval ,(cadr e)) (parser-eval (cat ,@(cddr e)))))
+      `(sequence (evalp ,(cadr e)) (evalp (cat ,@(cddr e)))))
      
      ((and (pair? e) (eq? (car e) 'alt) (null? (cddr e)))
-      `(parser-eval ,(cadr e)))
+      `(evalp ,(cadr e)))
      
      ((and (pair? e) (eq? (car e) 'alt))
-      `(orelse (parser-eval ,(cadr e)) (parser-eval (alt ,@(cddr e)))))
+      `(orelse (evalp ,(cadr e)) (evalp (alt ,@(cddr e)))))
      
      ((and (pair? e) (eq? (car e) 'alt~) (null? (cddr e)))
-      `(parser-eval ,(cadr e)))
+      `(evalp ,(cadr e)))
      
      ((and (pair? e) (eq? (car e) 'alt~))
-      `(orelse* (parser-eval ,(cadr e)) (parser-eval (alt~ ,@(cddr e)))))
+      `(orelse* (evalp ,(cadr e)) (evalp (alt~ ,@(cddr e)))))
      
      ((and (pair? e) (eq? (car e) 'if))
-      `(if+ ,(cadr e) (parser-eval ,(caddr e)) (parser-eval ,(cadddr e))))
+      `(ifp ,(cadr e) (evalp ,(caddr e)) (evalp ,(cadddr e))))
 
      ((and (pair? e) (eq? (car e) 'let))
-      `(let+ ,(cadr e) (parser-eval (cat ,@(cddr e)))))
+      `(letp ,(cadr e) (evalp (cat ,@(cddr e)))))
      
      ((and (pair? e) (eq? (car e) 'let*))
-      `(let*+ ,(cadr e) (parser-eval (cat ,@(cddr e)))))
+      `(letp* ,(cadr e) (evalp (cat ,@(cddr e)))))
      
      ((and (pair? e) (eq? (car e) 'letrec))
-      `(letrec+ ,(cadr e) (parser-eval (cat ,@(cddr e)))))
+      `(letrecp ,(cadr e) (evalp (cat ,@(cddr e)))))
 
      ((not (pair? e)) `(get ,e))
      (else e)))
@@ -114,9 +114,8 @@
                 (lambda (,v ,st ,fl) (cons ,v (delay (,fl))))
                 (lambda (,r ,st ,sc) '()))))
 
-
 (define-macro (parser f . b)
-  `(lambda+ ,f (parser-eval (cat ,@b))))
+  `(lambdap ,f (evalp (cat ,@b))))
 
 (define-macro (define-parser s . b)
   `(define ,(car s) (parser ,(cdr s) ,@b)))

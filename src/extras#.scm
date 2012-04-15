@@ -9,19 +9,19 @@
   many/separated))
 
 ;; 0 or 1 times
-(define-macro+ (maybe m)
+(define-macrop (maybe m)
   (let ((mm (gensym 'm)))
-    `(reify (,mm (parser-eval ,m))
-            (orelse (parser-eval ,m) (ret '())))))
-    
+    `(reify (,mm (evalp ,m))
+            (orelse (evalp ,m) (ret '())))))
+
 ;; 0 to n times
-(define-macro+ (many m)
+(define-macrop (many m)
   (let ((mm (gensym 'mm))
 	(kl (gensym 'kl))
 	(e (gensym 'e))
 	(es (gensym 'es)))
-    `(reify (,mm (parser-eval ,m))
-            (parser-eval
+    `(reify (,mm (evalp ,m))
+            (evalp
              (letrec ((,kl (parser (,es)
 				   (alt (cat (<- ,e (,mm))
 					     (,kl (cons ,e ,es)))
@@ -29,14 +29,14 @@
                (,kl '()))))))
 
 ;; up to n times
-(define-macro+ (upto n m)
+(define-macrop (upto n m)
   (let ((mm (gensym 'mm))
 	(ut (gensym 'ut))
 	(e  (gensym 'e))
 	(es (gensym 'es))
 	(j  (gensym 'j)))
-    `(reify (,mm (parser-eval ,m))
-            (parser-eval
+    `(reify (,mm (evalp ,m))
+            (evalp
              (letrec ((,ut (parser (,j ,es)
 				   (if (= ,j 0) (ret (reverse ,es))
 				       (alt (cat (<- ,e (,mm))
@@ -45,53 +45,53 @@
                (,ut ,n '()))))))
 
 ;; exactly n times
-(define-macro+ (times n m)
+(define-macrop (times n m)
   (let(
        (mm (gensym 'm))
        (tm (gensym 'tm))
        (x (gensym 'x))
        (e (gensym 'e))
        (es (gensym'es)))
-    `(reify (,mm (parser-eval ,m))
-            (parser-eval
+    `(reify (,mm (evalp ,m))
+            (evalp
              (letrec ((,tm (parser (,x)
 				   (if (= ,x 0) (ret '())
 				       (cat (<- ,e (,mm))
 					    (<- ,es (,tm (- ,x 1)))
 					    (ret (cons ,e ,es)))))))
                (,tm ,n))))))
-  
+
 ;; at least n times
-(define-macro+ (at-least n m)
+(define-macrop (at-least n m)
   (let ((mm (gensym 'mm))
 	(h (gensym 'h))
 	(t (gensym 't)))
-    `(parser-eval
-      (let ((,mm (parser () (parser-eval ,m))))
+    `(evalp
+      (let ((,mm (parser () (evalp ,m))))
         (cat (<- ,h (times ,n (,mm)))
 	     (<- ,t (many (,mm)))
 	     (ret (append ,h ,t)))))))
 
 ;; between n to m times 
-(define-macro+ (at-least/most n m p)
+(define-macrop (at-least/most n m p)
   (let ((mm (gensym 'mm))
 	(h (gensym 'h))
 	(t (gensym 't)))
-    `(parser-eval
-      (let ((,mm (parser () (parser-eval ,p))))
+    `(evalp
+      (let ((,mm (parser () (evalp ,p))))
         (cat (<- ,h (times ,n (,mm)))
 	     (<- ,t (upto (- ,m ,n) (,mm)))
 	     (ret (append ,h ,t)))))))
 
-(define-macro+ (many/separated val sep)
+(define-macrop (many/separated val sep)
   (let((sp (gensym 'sp))
        (vl (gensym 'vl))
        (v (gensym 'v))
        (vs (gensym 'vs)))
     `(reify (,sp ,sep)
             (reify (,vl ,val)
-                   (parser-eval
+                   (evalp
                     (alt (cat (<- ,v (,vl))
 			      (<- ,vs (many (cat (,sp) (,vl))))
 			      (ret (cons ,v ,vs)))
-                        (ret '())))))))
+			 (ret '())))))))

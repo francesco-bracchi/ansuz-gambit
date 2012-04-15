@@ -8,7 +8,7 @@
   fail
   ))
 
-(define-macro+ (get-if t?)
+(define-macrop (get-if t?)
   (let((st (gensym 'st))
        (sc (gensym 'sc))
        (fl (gensym 'fl))
@@ -19,7 +19,7 @@
                     (,sc ,ch (stream-cdr ,st) ,fl)
                     (,fl (list 'test-failed ,t? ,ch) ,st ,sc))))))
 
-(define-macro+ (get c0)
+(define-macrop (get c0)
   (let((ch (gensym 'ch))
        (st (gensym 'st))
        (sc (gensym 'sc))
@@ -29,28 +29,28 @@
 		  (,sc ,c0 (stream-cdr ,st) ,fl)
 		  (,fl (quote (not ,c0)) ,st ,sc)))))
 
-(define-macro+ (fail r)
+(define-macrop (fail r)
   (let((st (gensym 'st))
        (sc (gensym 'sc))
        (fl (gensym 'fl)))
     `(reflect (,st ,sc ,fl)
               (,fl ,r ,st ,sc))))
 
-(define-macro+ (get-stream)
+(define-macrop (get-stream)
   (let((st (gensym 'st))
        (sc (gensym 'sc))
        (fl (gensym 'fl)))
     `(reflect (,st ,sc ,fl)
               (,sc ,st ,st ,fl))))
 
-(define-macro+ (get-continuation)
+(define-macrop (get-continuation)
   (let((st (gensym 'st))
        (sc (gensym 'sc))
        (fl (gensym 'fl)))
     `(reflect (,st ,sc ,fl)
               (,sc ,sc ,st ,fl))))
 
-(define-macro+ (get-backtrack)
+(define-macrop (get-backtrack)
   (let((st (gensym 'st))
        (sc (gensym 'sc))
        (fl (gensym 'fl)))
