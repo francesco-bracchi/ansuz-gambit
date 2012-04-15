@@ -42,7 +42,7 @@ install: libdir $(INSTALLDIR)
 
 
 $(TESTDIR)/calc.o1:
-	$(GSC) $(TESTDIR)/calc
+	$(GSC) -:~~$(LIBNAME)=$(LIBDIR) $(TESTDIR)/calc
 
 calc: libdir $(TESTDIR)/calc.o1
 	$(GSI) -:~~$(LIBNAME)=$(LIBDIR) -e "(load \"~~${LIBNAME}/expressions\")" $(TESTDIR)/calc

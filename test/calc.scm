@@ -3,16 +3,15 @@
          (not safe)
          (block))
 
-
 (##namespace ("calc#"))
 (##include "~~/lib/gambit#.scm")
 
 (include "~~ansuz/on-strings#.scm")
 (include "~~ansuz/expressions#.scm")
+(include "~~ansuz/language#.scm")
 
 (define-parser (spc)
-  ;; (many #\space)
-  (kleene #\space))
+  (many #\space))
 
 (define idigit
   (let((i0 (char->integer #\0)))

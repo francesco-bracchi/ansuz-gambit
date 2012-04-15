@@ -38,8 +38,7 @@
 
 (define-parser (infix* ts)
   (if (null? ts) (fail "infix failed")
-      (let(
-           (pars (caar ts))
+      (let((pars (caar ts))
            (prec (cadar ts))
            (assc (caddar ts)))
         (alt (cat (<- func (pars))
@@ -51,8 +50,7 @@
 
 (define-parser (postfix* ts)
   (if (null? ts) (fail "postfix failed")
-      (let(
-           (pars (caar ts))
+      (let((pars (caar ts))
            (prec (cadar ts)))
         (alt (cat (<- func (pars))
 		  (ret (make-result prec func 'none)))
