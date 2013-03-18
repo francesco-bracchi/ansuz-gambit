@@ -10,8 +10,7 @@
 (define-macro (buffer-size) 8192)
   
 (define-macro (stream p)
-  (let(
-       (buffer (gensym 'buffer))
+  (let((buffer (gensym 'buffer))
        (size (gensym 'size))
        (port (gensym 'port)))
     `(let*((,port ,p)

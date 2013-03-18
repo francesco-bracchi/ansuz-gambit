@@ -22,9 +22,6 @@
 ;; that works correctly.
 ;; For deterministic parsers the incorrect orelse is sufficient to describe any
 ;; parser.
-;; orelse* is the theorical (?)
-;; orelse is the pratical (?)
-
 (##namespace ("ansuz-orelse#" orelse orelse*))
 
 (define-macrop (orelse m n)
@@ -47,7 +44,7 @@
                                  (lambda (,rr ,st1 ,sc1)
                                    (,nn ,st ,sc ,fl))))))))
 
-;; nondeterministic variation
+;; nondeterministic variant
 (define-macrop (orelse* m n)
   (let((mm (gensym 'm))
        (nn (gensym 'n))
