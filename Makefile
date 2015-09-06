@@ -6,7 +6,7 @@ LIBDIR		= 	lib
 TESTDIR		= 	test
 DIR		=	ls
 
-INSTALLDIR	= 	$(shell ${GSI} -e "(display (path-expand \"~~/${LIBNAME}\"))")
+INSTALLDIR	= 	$(shell ${GSI} -e "(display (path-expand \"~~${LIBNAME}\"))")
 SOURCES		=	$(shell ls ${SRCDIR}/*[a-zA-Z0-9].scm)
 INCLUDES	=	${SRCDIR}/*.scm ${SRCDIR}/re ${SRCDIR}/sources
 OBJECTS		=	$(SOURCES:.scm=.o1)
