@@ -41,8 +41,13 @@ install: libdir $(INSTALLDIR)
 	cp -r $(LIBDIR)/* $(INSTALLDIR)
 
 
-$(TESTDIR)/calc.o1:
-	$(GSC) -:~~$(LIBNAME)=$(LIBDIR) $(TESTDIR)/calc
+$(TESTDIR)/%.o1: $(TESTDIR)/%.scm
+	$(GSC) -:~~$(LIBNAME)=$(LIBDIR) $<
 
 calc: libdir $(TESTDIR)/calc.o1
 	$(GSI) -:~~$(LIBNAME)=$(LIBDIR) -e "(load \"~~${LIBNAME}/expressions\")" $(TESTDIR)/calc
+
+json: libdir $(TESTDIR)/json.o1
+	$(GSI) -:~~$(LIBNAME)=$(LIBDIR) -e "(load \"~~${LIBNAME}/expressions\")" $(TESTDIR)/json
+
+.PHONY: calc json
